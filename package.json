@@ -1,0 +1,23 @@
+{
+  "name": "geekfest",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/slackapi/geekfest-todo.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/slackapi/geekfest-todo/issues"
+  },
+  "homepage": "https://github.com/slackapi/geekfest-todo#readme",
+  "dependencies": {
+    "@slack/bolt": "^3.11.2",
+    "dotenv": "^16.0.1"
+  }
+}
