@@ -11,6 +11,11 @@ features:
   bot_user:
     display_name: YOURNAME Todos
     always_online: false
+  shortcuts:
+    - name: Create a todo
+      type: message
+      callback_id: message_new_todo
+      description: Create a todo from this message
 oauth_config:
   scopes:
     bot:
