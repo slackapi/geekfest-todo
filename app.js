@@ -29,6 +29,7 @@ app.shortcut('new_todo', async ({ shortcut, ack, client, logger }) => {
       trigger_id: shortcut.trigger_id,
       view: {
         type: "modal",
+        callback_id: 'todo_view',
         title: {
           type: "plain_text",
           text: "New Todo"
@@ -81,6 +82,22 @@ app.shortcut('new_todo', async ({ shortcut, ack, client, logger }) => {
   catch (error) {
     logger.error(error);
   }
+});
+
+// Handle the todo_view submission
+app.view('todo_view', async ({ ack, body, view, client, logger }) => {
+  // Acknowledge the view_submission request
+  await ack();
+
+  console.log("todo view");
+
+  logger.info(view['state']['values']);
+
+  // Assume there's an input block with `block_1` as the block_id and `input_a`
+  // const val = view['state']['values']['block_1']['input_a'];
+  // const user = body['user']['id'];
+
+
 });
 
 (async () => {
