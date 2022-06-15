@@ -18,6 +18,8 @@
   "homepage": "https://github.com/slackapi/geekfest-todo#readme",
   "dependencies": {
     "@slack/bolt": "^3.11.2",
-    "dotenv": "^16.0.1"
+    "dotenv": "^16.0.1",
+    "sequelize": "^6.20.1",
+    "sqlite3": "^5.0.8"
   }
 }
