@@ -1,6 +1,6 @@
 // use the values stored in .env
 require('dotenv').config();
-const { Sequelize, DataTypes } = require('sequelize');
+const { Sequelize, Model, DataTypes } = require('sequelize');
 
 const { App } = require('@slack/bolt');
 
@@ -13,11 +13,15 @@ const app = new App({
 
 // set up the data model
 const sequelize = new Sequelize('sqlite::memory:');
-const Todo = sequelize.define('Todo', {
+
+class Todo extends Model {}
+Todo.init({
   todo: DataTypes.STRING,
   due: DataTypes.DATE,
-});
+}, { sequelize, modelName: 'todo' });
 
+// HANDLE THE APP INTERACTIONS
+//
 // Respond to the shortcut to create a modal for defining the todo
 app.shortcut('new_todo', async ({ shortcut, ack, client, logger }) => {
   try {
@@ -29,7 +33,7 @@ app.shortcut('new_todo', async ({ shortcut, ack, client, logger }) => {
       trigger_id: shortcut.trigger_id,
       view: {
         type: "modal",
-        callback_id: 'todo_view',
+        callback_id: "todo_view",
         title: {
           type: "plain_text",
           text: "New Todo"
@@ -46,9 +50,10 @@ app.shortcut('new_todo', async ({ shortcut, ack, client, logger }) => {
         blocks: [
           {
             type: "input",
+            block_id: "todo_input",
             element: {
               type: "plain_text_input",
-              action_id: "plain_text_input-action"
+              action_id: "todo-text"
             },
             label: {
               type: "plain_text",
@@ -58,6 +63,7 @@ app.shortcut('new_todo', async ({ shortcut, ack, client, logger }) => {
           },
           {
             type: "input",
+            block_id: "todo_due_input",
             element: {
               type: "datepicker",
               placeholder: {
@@ -65,7 +71,7 @@ app.shortcut('new_todo', async ({ shortcut, ack, client, logger }) => {
                 text: "Select a date",
                 emoji: true
               },
-              action_id: "datepicker-action"
+              action_id: "todo-datepicker"
             },
             label: {
               type: "plain_text",
@@ -89,15 +95,22 @@ app.view('todo_view', async ({ ack, body, view, client, logger }) => {
   // Acknowledge the view_submission request
   await ack();
 
-  console.log("todo view");
+  // Get the specific values from the submitted view
+  const todo_description = view['state']['values']['todo_input']['todo-text']['value'];
+  const todo_due = view['state']['values']['todo_due_input']['todo-datepicker']['selected_date'];
 
-  logger.info(view['state']['values']);
+  console.log(todo_description);
+  console.log(todo_due);
 
-  // Assume there's an input block with `block_1` as the block_id and `input_a`
-  // const val = view['state']['values']['block_1']['input_a'];
-  // const user = body['user']['id'];
-
-
+  // Create a new todo in the database
+  (async () => {
+    await sequelize.sync();
+    const new_todo = await Todo.create({
+      todo: todo_description,
+      due: todo_due,
+    });
+    console.log(new_todo.toJSON());
+  })();
 });
 
 (async () => {
