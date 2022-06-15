@@ -27,6 +27,7 @@ app.shortcut('new_todo', async ({ shortcut, ack, client, logger }) => {
     // Call the views.open method to create a modal
     const result = await client.views.open({
       trigger_id: shortcut.trigger_id,
+      callback_id: 'todo_view',
       view: {
         type: "modal",
         title: {
