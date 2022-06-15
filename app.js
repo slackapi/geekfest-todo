@@ -83,7 +83,7 @@ app.shortcut('new_todo', async ({ shortcut, ack, client, logger }) => {
       }
     });
 
-    logger.info(result);
+    // logger.info(result);
   }
   catch (error) {
     logger.error(error);
@@ -99,9 +99,6 @@ app.view('todo_view', async ({ ack, body, view, client, logger }) => {
   const todo_description = view['state']['values']['todo_input']['todo-text']['value'];
   const todo_due = view['state']['values']['todo_due_input']['todo-datepicker']['selected_date'];
 
-  console.log(todo_description);
-  console.log(todo_due);
-
   // Create a new todo in the database
   (async () => {
     await sequelize.sync();
@@ -109,8 +106,73 @@ app.view('todo_view', async ({ ack, body, view, client, logger }) => {
       todo: todo_description,
       due: todo_due,
     });
-    console.log(new_todo.toJSON());
+    console.log(new_todo);
   })();
+});
+
+
+// Respond when someone opens your App Home
+app.event('app_home_opened', async ({ event, client, logger }) => {
+  (async () => {
+    await sequelize.sync();
+    const todos = await Todo.findAll();
+    console.log("All todos:", JSON.stringify(todos, null, 2));
+
+    let todo_blocks = [];
+    todos.forEach(todo => {
+      todo_blocks.push({
+        text: {
+          type: "mrkdwn",
+          text: `*${todo.todo}*`
+        },
+        description: {
+          type: "mrkdwn",
+          text: `Due: ${todo.due}`
+        },
+        value: `value-${todo.id}`,
+      });
+    });
+
+    try {
+      // Call views.publish
+      const result = await client.views.publish({
+        // Use the user ID associated with the event
+        user_id: event.user,
+        view: {
+          "type": "home",
+          "blocks": [
+            {
+              "type": "section",
+              "text": {
+                "type": "mrkdwn",
+                "text": `*Hello, <@${event.user}>!*`
+              }
+            },
+            {
+              "type": "divider"
+            },
+            {
+              "type": "section",
+              "text": {
+                "type": "mrkdwn",
+                "text": "These are your todos:"
+              },
+              "accessory": {
+                "type": "checkboxes",
+                "options": todo_blocks,
+                "action_id": "checkboxes-action"
+              }
+            }
+          ]
+        }
+      });
+    }
+    catch (error) {
+      logger.error(error);
+    }
+  })();
+
+
 });
 
 (async () => {
